@@ -371,23 +371,27 @@ def find_right_config() -> BaseConfig:
     logg.info('find_right_config()')
 
     # We want to be able to get this even from a root session.
-    WHICH_COMP: str = ''
+    WHICHCOMP: str = ''
     if os.getuid() != 0:
-        WHICH_COMP = os.environ.get('WHICHCOMP', '')
+        WHICHCOMP = os.environ.get(
+            'WHICHCOMP',
+            '')  # This is a server ID, provided by the shell environment
     else:  # root
         import subprocess as sproc
         main_user = sproc.run(f'getent passwd 1000 | cut -d : -f 1',
                               shell=True,
                               stdout=sproc.PIPE).stdout.decode().rstrip()
-        WHICH_COMP = sproc.run(f'sudo -Hiu {main_user} echo \$WHICHCOMP',
-                               shell=True,
-                               stdout=sproc.PIPE).stdout.decode().rstrip()
+        WHICHCOMP = sproc.run(f'sudo -Hiu {main_user} echo \$WHICHCOMP',
+                              shell=True,
+                              stdout=sproc.PIPE).stdout.decode().rstrip()
 
-    if WHICH_COMP == '':
-        logg.critical('find_right_config: WHICH_COMP not found.')
-        raise AssertionError('find_right_config: WHICH_COMP not found.')
+    if WHICHCOMP == '':
+        logg.critical(
+            'find_right_config: WHICHCOMP environment variable not found.')
+        raise AssertionError(
+            'find_right_config: WHICHCOMP environment variable not found.')
 
-    logg.info(f'Found WHICHCOMP = {WHICH_COMP}')
+    logg.info(f'Found WHICHCOMP = {WHICHCOMP}')
 
     config_class_dict: dict[str, type[BaseConfig]] = {
         '5': SC5Config,
@@ -395,7 +399,7 @@ def find_right_config() -> BaseConfig:
         'AORTS': AORTSConfig
     }
 
-    return config_class_dict[WHICH_COMP]()  # Instantiate.
+    return config_class_dict[WHICHCOMP]()  # Instantiate.
 
 
 SYSCTL_TWEAK_LIST_NETWORK: list[tuple[str, str | int]] = [

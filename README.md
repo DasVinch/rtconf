@@ -35,14 +35,14 @@ This is where you would define what should be done for your own PC!
 
 #### First test:
 
-`ipython -i rtconf.systemconfig -- --init`
+`ipython -i -m rtconf.systemconfig -- --init`
 
 Goal: obtain an interactive prompt with `devs`, `irqs`, and `kthreads`, which respctively describe the PCI devices, interrupts, and kernel threads found on the machine.
 You must already have the `WHICHCOMP` set and have defined a corresponding config class.
 
 #### Second test:
 
-`ipython -i rtconf.systemconfig -- --forkcheck`
+`ipython -i -m rtconf.systemconfig -- --forkcheck`
 
 Goal: check that it successfully forks `systemconfig` with root privileges, that we have all the dependencies OK, and exit gracefully.
 
