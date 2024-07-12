@@ -1,0 +1,10 @@
+Metadata-Version: 2.1
+Name: rtconf
+Version: 1.0.0
+Summary: rtconf utility package
+Author-email: Vincent Deo <vdeo@naoj.org>
+Description-Content-Type: text/markdown
+Requires-Dist: docopt==0.6.*
+Requires-Dist: mypy>=1.1
+Requires-Dist: sortedcontainers>=2.0
+Requires-Dist: cpuset-py3>=1.0

@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=58", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rtconf"
+description = "rtconf utility package"
+readme = "README.md"
+authors = [
+    {name = "Vincent Deo", email = "vdeo@naoj.org"}
+]
+dependencies = [
+    "docopt==0.6.*",
+    "mypy>=1.1",
+    "sortedcontainers>=2.0",
+    "cpuset-py3>=1.0",
+]
+dynamic = ["version"]
+
+#[tool.setuptools]
+#packages = ["swmain"]
+
+[tool.setuptools.packages.find]
+include = ["rtconf*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "rtconf.__version__"}
+
+[tool.coverage.run]
+source = ["rtconf"]
+
+[tool.pyright]
+typeCheckingMode = "basic" # off | basic | standard | strict # Look there https://github.com/microsoft/pyright/blob/main/docs/configuration.md
+include = ["rtconf"]
+exclude = ["build/",
+           "**/__pycache",
+           "**/.mypy_cache"
+           ]
+reportMissingImports = true
+reportMissingTypeStubs = false
+pythonVersion = "3.10"
+pythonPlatform = "Linux"
