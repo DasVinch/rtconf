@@ -62,7 +62,7 @@ class IRQ:
             f'IRQ {self.id:3d} - Allowed {tl.list_to_range_notation(self._smp_affinity_list)}; '
             f'current {tl.list_to_range_notation(self._eff_affinity_list)}')
         if self.pci_device:
-            s += f'- PCI dev {self.pci_device.pci_addr} (drv {self.pci_device.driver}) - NUMA {self.best_node}.'
+            s += f' -- PCI dev {self.pci_device.pci_addr} (drv {self.pci_device.driver}) - NUMA {self.best_node}.'
 
         return s
 
