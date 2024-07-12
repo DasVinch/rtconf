@@ -381,9 +381,10 @@ def find_right_config() -> BaseConfig:
         main_user = sproc.run(f'getent passwd 1000 | cut -d : -f 1',
                               shell=True,
                               stdout=sproc.PIPE).stdout.decode().rstrip()
-        WHICHCOMP = sproc.run(f'sudo -Hiu {main_user} echo \$WHICHCOMP',
-                              shell=True,
-                              stdout=sproc.PIPE).stdout.decode().rstrip()
+        WHICHCOMP = sproc.run(
+            f'sudo -Hiu {main_user} echo \$WHICHCOMP',
+            shell=True,
+            stdout=sproc.PIPE).stdout.decode().split('\n')[-2].rstrip()
 
     if WHICHCOMP == '':
         logg.critical(
@@ -396,7 +397,8 @@ def find_right_config() -> BaseConfig:
     config_class_dict: dict[str, type[BaseConfig]] = {
         '5': SC5Config,
         '6': SC6Config,
-        'AORTS': AORTSConfig
+        'AORTS': AORTSConfig,
+        'UNICORN': RTCConfig
     }
 
     return config_class_dict[WHICHCOMP]()  # Instantiate.

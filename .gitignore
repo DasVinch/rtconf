@@ -17,9 +17,6 @@ cython_debug
 *.pyc
 *.egg-info
 
-# specific param files
-shesha/par.pxi
-
 # Data files -- you can still git add them manually
 *.h5
 #*.fits

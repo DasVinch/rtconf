@@ -124,7 +124,7 @@ if __name__ == '__main__':
         else:  # We are not root - this is executed first but calls the first block
 
             functions.check_command('tmux')
-            functions.check_command('cc-setlatency')
+            # functions.check_command('cc-setlatency') skipped in standalone mode.
 
             if cfg.TEST:
                 macros.test_non_root_call()
@@ -138,7 +138,7 @@ if __name__ == '__main__':
                 #f'LOG_PATH={LOG_PATH}',
                 'python3',
                 '-m',
-                'swmain.infra.rtconf.systemconfig'
+                'rtconf.systemconfig'
             ]
             if FORK_CHECK_DO_NOTHING:
                 cmd_array += ['--forkcheck']
