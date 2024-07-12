@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Set, TYPE_CHECKING
+import typing as typ
 
 import subprocess as sproc
 from dataclasses import dataclass
@@ -17,8 +17,8 @@ logg = logging.getLogger(__name__)
 class PCIDevice:
     pci_addr: str
     irq_type: IRQ_TYPE
-    irq_list: List[int]
-    cpu_set: Set[int]
+    irq_list: list[int]
+    cpu_set: set[int]
     numa_node: int
 
     driver: str = ''

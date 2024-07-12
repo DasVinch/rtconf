@@ -1,8 +1,9 @@
 '''
     Kernel analysis stuff.
 '''
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Dict, Any, Optional as Op, Set
+import typing as typ
 
 import os
 import glob
@@ -27,7 +28,7 @@ import logging
 logg = logging.getLogger(__name__)
 
 
-def check_command(command: str, expect_retcode: Op[int] = None) -> None:
+def check_command(command: str, expect_retcode: int | None = None) -> None:
     '''
     Check if a command is available in the system.
     Possible, run that command and check the retcode is expected
@@ -48,7 +49,7 @@ def check_command(command: str, expect_retcode: Op[int] = None) -> None:
             f'Program {command} not installed / not working properly.')
 
 
-def update_from_proc_interrupts(irq_list: List[IRQ]) -> None:
+def update_from_proc_interrupts(irq_list: list[IRQ]) -> None:
     '''
         Stolen from the /proc/interrupts parser of Redhat's insight package
     '''
@@ -77,7 +78,7 @@ def update_from_proc_interrupts(irq_list: List[IRQ]) -> None:
         parts = line.split(None, len(cpu_names) + 1)
 
         irq_name = parts[0].replace(":", "")
-        one_int: Dict[str, Any] = {}
+        one_int: dict[str, typ.Any] = {}
         one_int['num_cpus'] = len(cpu_names)
         counts = []
         if len(parts) == len(cpu_names) + 2:
@@ -101,7 +102,7 @@ def update_from_proc_interrupts(irq_list: List[IRQ]) -> None:
             irq.update_counts(time_now, data[str(irq.id)]['counts'])
 
 
-def init_irq_objects() -> List[IRQ]:
+def init_irq_objects() -> list[IRQ]:
     irq_fold = '/proc/irq'
 
     irq_names = [
@@ -115,7 +116,7 @@ def init_irq_objects() -> List[IRQ]:
     return irq_objs
 
 
-def init_kthread_objects() -> List[KThread]:
+def init_kthread_objects() -> list[KThread]:
 
     kthread_raw_list = sproc.run(
         ['ps', '--ppid', '2', '-p', '2', '-o', 'pid,cls,cmd'],
@@ -123,7 +124,7 @@ def init_kthread_objects() -> List[KThread]:
     # [1:-1]: Remove title and empty line at end.
     # cmd must be last to avoid truncation
 
-    kthread_list: List[KThread] = []
+    kthread_list: list[KThread] = []
 
     ps_regex = re.compile(' *(\d+) *([A-Z]+) *(\[.*\])')
 
@@ -140,13 +141,13 @@ def init_kthread_objects() -> List[KThread]:
     return kthread_list
 
 
-def filter_network_kthreads(all_kthreads: List[KThread],
-                            iface: Op[str]) -> List[KThread]:
+def filter_network_kthreads(all_kthreads: list[KThread],
+                            iface: str | None) -> list[KThread]:
     # TODO
     return []
 
 
-def identify_fg_objs(irq_list: List[IRQ], driver: str) -> List[EDTObject]:
+def identify_fg_objs(irq_list: list[IRQ], driver: str) -> list[EDTObject]:
     # Identify the EDT irqs.
     fg_objs = [
         EDTObject(irq=irq) for irq in irq_list
@@ -158,7 +159,7 @@ def identify_fg_objs(irq_list: List[IRQ], driver: str) -> List[EDTObject]:
     return fg_objs
 
 
-def identify_net_objs(irq_list: List[IRQ], iface: str) -> List[EDTObject]:
+def identify_net_objs(irq_list: list[IRQ], iface: str) -> list[EDTObject]:
     net_objs = [
         EDTObject(irq=irq) for irq in irq_list
         if (irq.pci_device is not None and irq.pci_device.net_iface == iface)
@@ -166,7 +167,7 @@ def identify_net_objs(irq_list: List[IRQ], iface: str) -> List[EDTObject]:
     return net_objs
 
 
-def init_pci_objects() -> List[PCIDevice]:
+def init_pci_objects() -> list[PCIDevice]:
     pci_fold = '/sys/bus/pci/devices'
 
     devices = glob.glob(pci_fold + '/*')
@@ -191,7 +192,7 @@ def init_pci_objects() -> List[PCIDevice]:
         stdout=sproc.PIPE).stdout.decode().rstrip().split('\n')
     re_netpci = re.compile(
         '^/sys/class/net/(.*)/device/uevent:PCI_SLOT_NAME=(.*)$')
-    netpci_dict: Dict[str, str] = {}
+    netpci_dict: dict[str, str] = {}
     for iface_line in raw_netpci:
         _match = re_netpci.findall(iface_line)[0]
         netpci_dict[_match[1]] = _match[0]
@@ -251,8 +252,8 @@ def init_pci_objects() -> List[PCIDevice]:
             dev.add_network_iface(netpci_dict[pci_addr])
 
     logg.info(f'init_pci_objects: found {len(dev_objs)} PCIe items.')
-    devs_with_named_driver: Set[PCIDevice] = {d for d in dev_objs if d.driver}
-    drivers_with_pci_obj: Set[str] = {d.driver for d in devs_with_named_driver}
+    devs_with_named_driver: set[PCIDevice] = {d for d in dev_objs if d.driver}
+    drivers_with_pci_obj: set[str] = {d.driver for d in devs_with_named_driver}
     logg.info(f'init_pci_objects: found {len(devs_with_named_driver)} '
               f'PCIe items with nominative drivers {drivers_with_pci_obj}')
     logg.info(f'init_pci_objects: found {len(netpci_dict)} network interfaces')
@@ -260,8 +261,8 @@ def init_pci_objects() -> List[PCIDevice]:
     return dev_objs
 
 
-def match_irq_and_pci(irqs: List[IRQ], devs: List[PCIDevice]) -> None:
-    reverse_lookup: Dict[int, PCIDevice] = {}
+def match_irq_and_pci(irqs: list[IRQ], devs: list[PCIDevice]) -> None:
+    reverse_lookup: dict[int, PCIDevice] = {}
     logg.debug('match_irq_and_pci()')
 
     # New problem - we may have multiple devices reclaiming the same irq
@@ -286,13 +287,13 @@ def match_irq_and_pci(irqs: List[IRQ], devs: List[PCIDevice]) -> None:
     )
 
 
-def match_kthread_and_irq(irqs: List[IRQ], kthreads: List[KThread]) -> None:
+def match_kthread_and_irq(irqs: list[IRQ], kthreads: list[KThread]) -> None:
     # Does each IRQ have a kthread?
     # Does each IRQ-type kthread have an IRQ?
     logg.debug('match_kthread_and_irq()')
 
     # Reverse lookup kthreads by irq number.
-    reverse_lookup: Dict[int, KThread] = {}
+    reverse_lookup: dict[int, KThread] = {}
     for kthread in kthreads:
         #if kthread.kthread_type == KThreadTypeEnum.IRQ:
         if kthread._irq_number is not None:
@@ -308,14 +309,14 @@ def match_kthread_and_irq(irqs: List[IRQ], kthreads: List[KThread]) -> None:
         f'match_irq_and_pci: Matched {len(irq_has_kt)} IRQ/KThread pairs.')
 
 
-def rescan_cpusets() -> Dict[str, CPUSpec]:
+def rescan_cpusets() -> dict[str, CPUSpec]:
     ''' Either /usr/bin/python, or pip install cpuset-py3 in user distro '''
     logg.debug('rescan_cpusets()')
 
     from cpuset import cset
 
     _ = cset.CpuSet()
-    sets: Dict[str, cset.CpuSet] = cset.CpuSet.sets
+    sets: dict[str, cset.CpuSet] = cset.CpuSet.sets
 
     my_sets = {
         name: CPUSpec(sets[name].name, str_spec=sets[name].getcpus())
@@ -326,7 +327,7 @@ def rescan_cpusets() -> Dict[str, CPUSpec]:
 
 
 if __name__ == "__main__":
-    from swmain.infra.rtconf import functions
+    from rtconf import functions
     irqs = functions.init_irq_objects()
     devs = functions.init_pci_objects()
     kthreads = functions.init_kthread_objects()

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Set, List
-if TYPE_CHECKING:
+import typing as typ
+if typ.TYPE_CHECKING:
     from .pcidevices import PCIDevice
     from .cset import CPUSpec
     from .irqs import IRQ
@@ -69,7 +69,7 @@ def hyperthreading_disable() -> None:
         f'^{pfix}/cpu(\d+)/topology/thread_siblings_list:(\d+)(?:,(\d+))?$')
 
     found_comma = False
-    set_toremove: Set[int] = set()
+    set_toremove: set[int] = set()
 
     for cpuline in sibling_enumeration_all:
         match = re_parse.findall(cpuline)[0]
@@ -126,6 +126,11 @@ def hold_cpu_dma_latency() -> None:
     '''
         Require NO ROOT because we're using the user's tmux.
     '''
+    logg.warning(
+        'BYPASSING hold_cpu_dma_latency in rtconf standalone version (just for a missing tmux wrapper...)'
+    )
+    return
+
     logg.warning('hold_cpu_dma_latency - starting cc-setlatency 0 in tmux.')
     # Keep the tmux magic approach.
     from .. import tmux
@@ -136,7 +141,7 @@ def hold_cpu_dma_latency() -> None:
 
 
 @tl.root_decorator
-def irq_parking(irqs: List[IRQ], cpus: CPUSpec) -> None:
+def irq_parking(irqs: list[IRQ], cpus: CPUSpec) -> None:
     # Begin by disabling IRQbalance.
     logg.warning(
         f'irq_parking() - stopping irqbalance; moving {len(irqs)} onto CPUs {cpus.get_str()}'
@@ -151,7 +156,7 @@ def irq_parking(irqs: List[IRQ], cpus: CPUSpec) -> None:
 
 
 @tl.root_decorator
-def irq_restart(cpus_nobalance: CPUSpec, irqs_nobalance: Set[IRQ]) -> None:
+def irq_restart(cpus_nobalance: CPUSpec, irqs_nobalance: set[IRQ]) -> None:
 
     ids = [irq.id for irq in irqs_nobalance]
     logg.warning(
@@ -207,7 +212,7 @@ def cset_destruction():
 
 
 @tl.root_decorator
-def cset_creation(csets: List[CPUSpec], shield_cpus: CPUSpec) -> None:
+def cset_creation(csets: list[CPUSpec], shield_cpus: CPUSpec) -> None:
 
     logg.warning(
         f'cset_creation() - Initializing {len(csets)} - shielded CPUs: {shield_cpus.get_str()}.'
@@ -234,7 +239,7 @@ def cset_creation(csets: List[CPUSpec], shield_cpus: CPUSpec) -> None:
     sproc.run('cset proc -k --force root -t system'.split())
 
 
-def irq_summary(irqs: List[IRQ]) -> None:
+def irq_summary(irqs: list[IRQ]) -> None:
     for irq in irqs:
         if not irq.was_pinned_successfully_once:
             if irq.pci_device is not None:
@@ -244,7 +249,7 @@ def irq_summary(irqs: List[IRQ]) -> None:
             logg.debug(f'irq_summary: Untouched IRQ {irq.id} {s}')
 
 
-def kthread_summary(kts: List[KThread]) -> None:
+def kthread_summary(kts: list[KThread]) -> None:
     from .kthread import KThreadTypeEnum as KTTE
     for kt in kts:
         if not kt.was_cset_successfully_once:

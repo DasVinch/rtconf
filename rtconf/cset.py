@@ -2,8 +2,9 @@
     It's honetly simpler to bind to process calls for commonly used sets
     Rather than bother to interface cleanly with the cset python API.
 '''
+from __future__ import annotations
 
-from typing import List, Optional as Op
+import typing as typ
 
 from . import tools as tl
 
@@ -19,10 +20,10 @@ class CPUSpec:
     def __init__(self,
                  name: str,
                  *,
-                 str_spec: Op[str] = None,
-                 cpu_list: Op[List[int]] = None,
-                 mem_list: Op[List[int]] = None,
-                 mask: Op[int] = None,
+                 str_spec: str | None = None,
+                 cpu_list: list[int] | None = None,
+                 mem_list: list[int] | None = None,
+                 mask: int | None = None,
                  no_irqbalance: bool = False) -> None:
 
         logg.debug('CPUSpec::__init__')

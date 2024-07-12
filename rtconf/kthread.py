@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Optional, List, Dict
-if TYPE_CHECKING:
+import typing as typ
+if typ.TYPE_CHECKING:
     from .irqs import IRQ
 
 from .cset import CPUSpec
@@ -44,7 +44,7 @@ class KThreadTypeEnum(Enum):
     # TODO as well as [nvidia] and [nv_queue] and [UVM GPUX ...] gpu stuff.
 
     @classmethod
-    def _missing_(cls: type, value: Any) -> KThreadTypeEnum:
+    def _missing_(cls: type, value: typ.Any) -> KThreadTypeEnum:
         logg.warning(f'KThreadTypeEnum::_missing_ {value}')
         return KThreadTypeEnum.OTHER
 
@@ -55,7 +55,7 @@ class KSchedTypeEnum(Enum):
     UNKNOWN = 'UNKNOWN'
 
     @classmethod
-    def _missing_(cls: type, value: Any) -> KSchedTypeEnum:
+    def _missing_(cls: type, value: typ.Any) -> KSchedTypeEnum:
         logg.warning(f'KSchedTypeEnum::_missing_ {value}')
         return KSchedTypeEnum.UNKNOWN
 
@@ -81,11 +81,11 @@ class KThread:  # Actually any process...
             self.kthread_type = KThreadTypeEnum(slashsplit[0])
 
         # Now special behaviors:
-        self._irq_number: Optional[int] = None
-        self._irq_obj: Optional[IRQ] = None
+        self._irq_number: int | None = None
+        self._irq_obj: IRQ | None = None
 
         self._is_rcu: bool = False
-        self._rcuc_cpu: Optional[int] = None
+        self._rcuc_cpu: int | None = None
 
         # Not KThreadTypeEnum.OTHER implies len(slashsplit) > 1
         if self.kthread_type == KThreadTypeEnum.IRQ:
@@ -142,7 +142,7 @@ class KThread:  # Actually any process...
             l.split(':') for l in self.procfs_read('sched')[2:] if ':' in l
         ]
 
-        self.sched_info: Dict[str, str] = {
+        self.sched_info: dict[str, str] = {
             l[0].strip(): l[1].strip()
             for l in sched_info_lines
         }
@@ -168,7 +168,7 @@ class KThread:  # Actually any process...
     def procfs_write(self, file: str, content: str) -> None:
         tl.procfs_write(f'/proc/{self.pid}/{file}', content)
 
-    def procfs_read(self, file: str) -> List[str]:
+    def procfs_read(self, file: str) -> list[str]:
         return tl.procfs_read(f'/proc/{self.pid}/{file}')
 
     def __repr__(self) -> str:

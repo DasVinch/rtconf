@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import List, Optional, TYPE_CHECKING, Any
-if TYPE_CHECKING:
+import typing as typ
+if typ.TYPE_CHECKING:
     from .pcidevices import PCIDevice
     from .kthread import KThread
 
@@ -33,24 +33,24 @@ class IRQ:
         # I don't do affinity_hint since I expect irqbalance to be off on a RT machine.
 
         self._smp_affinity: int = 0x0
-        self._smp_affinity_list: List[int] = []
+        self._smp_affinity_list: list[int] = []
 
         self._eff_affinity: int = 0x0
-        self._eff_affinity_list: List[int] = []
+        self._eff_affinity_list: list[int] = []
 
         self.best_node: int = -2
-        self.pci_device: Optional[PCIDevice] = None
+        self.pci_device: PCIDevice | None = None
 
-        self.kthread: Optional[KThread] = None
+        self.kthread: KThread | None = None
 
         self._count: int = 0
         self._unhandled: int = 0
         self._last_unhandled_ms: int = 0
 
-        self._counts: np.ndarray[Any, np.dtype[np.int64]] = np.zeros(
+        self._counts: np.ndarray[typ.Any, np.dtype[np.int64]] = np.zeros(
             tl.CPU_COUNT, np.int64)
         self._counts_time: float = 0
-        self._counts_hz: np.ndarray[Any, np.dtype[np.float64]] = np.zeros(
+        self._counts_hz: np.ndarray[typ.Any, np.dtype[np.float64]] = np.zeros(
             tl.CPU_COUNT, np.float64)
 
         self.was_pinned_successfully_once = False
@@ -103,10 +103,10 @@ class IRQ:
     def procfs_write(self, file: str, content: str) -> None:
         tl.procfs_write(f'{self.procfs_folder}/{file}', content)
 
-    def procfs_read(self, file: str) -> List[str]:
+    def procfs_read(self, file: str) -> list[str]:
         return tl.procfs_read(f'{self.procfs_folder}/{file}')
 
-    def get_pin_to_cpu(self) -> List[int]:
+    def get_pin_to_cpu(self) -> list[int]:
         self.refresh_contents()
         logg.info(
             f'IRQ::get_pin_to_cpu(): IRQ {self.id} bound to {tl.list_to_range_notation(self._smp_affinity_list)}'
@@ -115,8 +115,8 @@ class IRQ:
 
     @tl.root_decorator
     def set_pin_to_cpu(self,
-                       cpu_list: List[int],
-                       numaify_subset_ok: bool = False) -> List[int]:
+                       cpu_list: list[int],
+                       numaify_subset_ok: bool = False) -> list[int]:
 
         logg.info(
             f'IRQ::set_pin_to_cpu(): IRQ {self.id} onto to {tl.list_to_range_notation(cpu_list)}'

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from typing import List, Union, Tuple, Dict, Type, TYPE_CHECKING, Optional as Op, Set
-if TYPE_CHECKING:
+import typing as typ
+if typ.TYPE_CHECKING:
     from .irqs import IRQ
 
 import os
@@ -38,9 +38,9 @@ class BaseConfig(ABC):
 
     DMA_LATENCY = False
 
-    my_cpusets: List[CPUSpec] = []
-    cpus_no_balancing: Op[CPUSpec] = None
-    irqs_nobalancing: Set[IRQ] = set()
+    my_cpusets: list[CPUSpec] = []
+    cpus_no_balancing: CPUSpec | None = None
+    irqs_nobalancing: set[IRQ] = set()
 
     def __init__(self) -> None:
         # Enforce the singleton - by failure, not by returning the singleton instance.
@@ -100,8 +100,8 @@ class BaseConfig(ABC):
 
         self.my_cpusets_dict = {cset.name: cset for cset in self.my_cpusets}
 
-    def irq_kthread_special_rules(self, irq_list: List[IRQ],
-                                  kt_list: List[KThread]) -> None:
+    def irq_kthread_special_rules(self, irq_list: list[IRQ],
+                                  kt_list: list[KThread]) -> None:
         logg.critical(
             'irq_kthread_special_rules @ BaseConfig must be subclassed.')
         raise AssertionError('Must implement if using cfg.CUSTOM_IRQ_RULES')
@@ -184,8 +184,8 @@ class SC5Config(RTCConfig):
     ]
     # yapf: enable
 
-    def irq_kthread_special_rules(self, irq_list: List[IRQ],
-                                  kt_list: List[KThread]) -> None:
+    def irq_kthread_special_rules(self, irq_list: list[IRQ],
+                                  kt_list: list[KThread]) -> None:
 
         logg.info('irq_kthread_special_rules @ SC5Config')
 
@@ -234,8 +234,8 @@ class SC6Config(RTCConfig):
 
     PERFORMANCE = True
 
-    def irq_kthread_special_rules(self, irq_list: List[IRQ],
-                                  kt_list: List[KThread]) -> None:
+    def irq_kthread_special_rules(self, irq_list: list[IRQ],
+                                  kt_list: list[KThread]) -> None:
         logg.info('irq_kthread_special_rules @ SC6Config')
         pass
 
@@ -311,8 +311,8 @@ class AORTSConfig(RTCConfig):
     ]
     # yapf: enable
 
-    def irq_kthread_special_rules(self, irq_list: List[IRQ],
-                                  kt_list: List[KThread]) -> None:
+    def irq_kthread_special_rules(self, irq_list: list[IRQ],
+                                  kt_list: list[KThread]) -> None:
         logg.info('irq_kthread_special_rules @ AORTSConfig')
 
         for irq in irq_list:
@@ -389,7 +389,7 @@ def find_right_config() -> BaseConfig:
 
     logg.info(f'Found WHICHCOMP = {WHICH_COMP}')
 
-    config_class_dict: Dict[str, Type[BaseConfig]] = {
+    config_class_dict: dict[str, type[BaseConfig]] = {
         '5': SC5Config,
         '6': SC6Config,
         'AORTS': AORTSConfig
@@ -398,7 +398,7 @@ def find_right_config() -> BaseConfig:
     return config_class_dict[WHICH_COMP]()  # Instantiate.
 
 
-SYSCTL_TWEAK_LIST_NETWORK: List[Tuple[str, Union[str, int]]] = [
+SYSCTL_TWEAK_LIST_NETWORK: list[tuple[str, str | int]] = [
     ('net.core.netdev_max_backlog', 250000),
     ('net.core.rmem_max', 16777216),
     ('net.core.wmem_max', 16777216),
@@ -419,15 +419,14 @@ SYSCTL_TWEAK_LIST_NETWORK: List[Tuple[str, Union[str, int]]] = [
 ]
 
 # File, enable value, disable value
-SYSCTL_TWEAK_LIST_CPUPERF: List[Tuple[str, Union[str, int], Union[
-    str, int]]] = [
-        ('/proc/sys/vm/stat_interval', 1000, 1),
-        ('/proc/sys/vm/dirty_writeback_centisecs', 5000, 500),
-        ('/proc/sys/kernel/watchdog', 0, 1),
-        ('/proc/sys/kernel/nmi_watchdog', 0, 1),
-        ('/proc/sys/kernel/sched_rt_runtime_us', 995000, 950000
-         )  # Could be -1 but actually probs antiproductive.
-    ]
+SYSCTL_TWEAK_LIST_CPUPERF: list[tuple[str, str | int, str | int]] = [
+    ('/proc/sys/vm/stat_interval', 1000, 1),
+    ('/proc/sys/vm/dirty_writeback_centisecs', 5000, 500),
+    ('/proc/sys/kernel/watchdog', 0, 1),
+    ('/proc/sys/kernel/nmi_watchdog', 0, 1),
+    ('/proc/sys/kernel/sched_rt_runtime_us', 995000, 950000
+     )  # Could be -1 but actually probs antiproductive.
+]
 SYSCTL_TWEAK_LIST_CPUPERF += [
     (machine_check_file, 0, 300) for machine_check_file in glob.glob(
         '/sys/devices/system/machinecheck/machinecheck*/check_interval')

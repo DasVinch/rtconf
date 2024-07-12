@@ -18,8 +18,6 @@ SYNC_FORK_FILE = '/tmp/systemconfig_launched'
 
 if __name__ == '__main__':
 
-    from swmain.infra.logger import init_logger_autoname, LOG_PATH
-    init_logger_autoname(stdoutlevel=logging.WARNING)
     logg = logging.getLogger(__name__)
 
     from docopt import docopt
@@ -139,7 +137,10 @@ if __name__ == '__main__':
             # Run the if root block as root.
             # Pass the logfile destination to root (since it's derived from $HOME)
             cmd_array = [
-                'sudo', f'LOG_PATH={LOG_PATH}', 'python3', '-m',
+                'sudo',
+                #f'LOG_PATH={LOG_PATH}',
+                'python3',
+                '-m',
                 'swmain.infra.rtconf.systemconfig'
             ]
             if FORK_CHECK_DO_NOTHING:

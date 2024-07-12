@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional as Op
+import typing as typ
 
-if TYPE_CHECKING:
+if typ.TYPE_CHECKING:
     from .kthread import KThread
     from .irqs import IRQ
-    from .pcidevices import PCIDevice
     from .cset import CPUSpec
 
 from . import tools as tl
@@ -22,8 +21,8 @@ class EDTObject:  # Could really subclass IRQ - but we'd need to promote class o
 
     def __init__(self,
                  *,
-                 irq: Op[IRQ] = None,
-                 kthread: Op[KThread] = None) -> None:
+                 irq: IRQ | None = None,
+                 kthread: KThread | None = None) -> None:
 
         logg.debug('EDTObject::__init__')
 
@@ -45,7 +44,7 @@ class EDTObject:  # Could really subclass IRQ - but we'd need to promote class o
             f'EDTObject::__init__ - bound together IRQ {self.irq.id}, kt {self.kthread.name} {self.kthread.pid}, PCI {self.pci_device.ip_addr}'
         )
 
-    def bind_to_cset(self, cset: CPUSpec, ktprio: Op[int] = None) -> None:
+    def bind_to_cset(self, cset: CPUSpec, ktprio: int | None = None) -> None:
         logg.info(
             f'EDTObject::bind_to_cset - IRQ {self.irq.id} / KT {self.kthread.pid} onto CPUs {cset.get_str()}'
         )
