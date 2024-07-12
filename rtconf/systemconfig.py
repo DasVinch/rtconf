@@ -26,11 +26,8 @@ if __name__ == '__main__':
     ONLY_INIT = args['--init']
     FORK_CHECK_DO_NOTHING = args['--forkcheck']
 
-    from swmain.infra.rtconf import rtlinux_configs
+    from rtconf import rtlinux_configs, functions, macros
     cfg = rtlinux_configs.find_right_config()
-
-    from swmain.infra.rtconf import functions
-    from swmain.infra.rtconf import macros
 
     # =========================
     # Initialization of objects
