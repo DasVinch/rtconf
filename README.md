@@ -1,4 +1,6 @@
-# rtconf subpackage -- standalone version
+# rtconf
+
+## rtconf subpackage -- this is the standalone version
 
 The complete version will be open-sourced at a later date. This package will be deprecated when the complete release (SCExAO's software-main), which includes this as a submodule, is published.
 
